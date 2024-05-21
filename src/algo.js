@@ -1,15 +1,17 @@
 class Cache {
-    constructor () {
-        this.entries = []
+    constructor() {
+        this.entries = [];
     }
 
-    contains (entry) {
-        return this.entries.find(e => entry.every((value, index) => value === e[index]))
+    contains(entry) {
+        return this.entries.find((e) =>
+            entry.every((value, index) => value === e[index])
+        );
     }
 
-    add (entry) {
+    add(entry) {
         if (!this.contains(entry)) {
-            this.entries.push(entry)
+            this.entries.push(entry);
         }
     }
 }
@@ -42,7 +44,7 @@ function nextSteps(input, capacities) {
 
                 if (!cache.contains(copy)) {
                     result.push(copy);
-                    cache.add(copy)
+                    cache.add(copy);
                 }
             }
         }
@@ -60,21 +62,19 @@ export function allTubes({
 } = {}) {
     if (stepNumber > stepLimit) return -1;
     if (possibilities.length === 0) return -1;
-    if (possibilities.find(p => p.includes(target))) return stepNumber;
+    if (possibilities.find((p) => p.includes(target))) return stepNumber;
 
     const nextPossibilities = possibilities.reduce((all, p) => {
-        return [...all, ...nextSteps(p, capacities)]
-    }, [])
+        return [...all, ...nextSteps(p, capacities)];
+    }, []);
 
     return allTubes({
         possibilities: nextPossibilities,
         capacities,
         target,
         stepNumber: stepNumber + 1,
-        stepLimit
-    })
+        stepLimit,
+    });
 }
 
-console.log(
-    allTubes()
-)
+console.log(allTubes());
