@@ -18,7 +18,16 @@ class Cache {
 
 const cache = new Cache();
 
-function nextSteps(input, capacities) {
+class Posibility {
+    constructor(value, parent) {
+        this.parent = parent;
+        this.value = value;
+    }
+}
+
+function nextSteps(possibility, capacities) {
+    const input = possibility.value;
+
     if (input.length !== capacities.length) {
         throw Error('Capacities must match input');
     }
@@ -43,7 +52,7 @@ function nextSteps(input, capacities) {
                 }
 
                 if (!cache.contains(copy)) {
-                    result.push(copy);
+                    result.push(new Posibility(copy, possibility));
                     cache.add(copy);
                 }
             }
@@ -54,19 +63,30 @@ function nextSteps(input, capacities) {
 }
 
 export function allTubes({
-    possibilities = [[15, 0, 0]],
+    possibilities = [new Posibility([15, 0, 0], null)],
     capacities = [15, 9, 5],
     target = 7,
     stepNumber = 0,
-    stepLimit = 10,
+    stepLimit = 50,
 } = {}) {
     if (stepNumber > stepLimit) return -1;
     if (possibilities.length === 0) return -1;
-    if (possibilities.find((p) => p.includes(target))) return stepNumber;
+    const resultP = possibilities.find((p) => p.value.includes(target));
+    if (resultP) {
+        const result = [resultP.value]
+        let temp = resultP;
+        while(temp.parent !== null) {
+            result.unshift(temp.parent.value);
+            temp = temp.parent;
+        }
+        return result
+    }
 
     const nextPossibilities = possibilities.reduce((all, p) => {
         return [...all, ...nextSteps(p, capacities)];
     }, []);
+
+    // console.log(nextPossibilities)
 
     return allTubes({
         possibilities: nextPossibilities,
@@ -77,4 +97,4 @@ export function allTubes({
     });
 }
 
-console.log(allTubes());
+console.log(allTubes({ target: 13, stepLimit: 50 }));
