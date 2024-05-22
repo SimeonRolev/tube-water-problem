@@ -14,11 +14,15 @@ class Cache {
             this.entries.push(entry);
         }
     }
+
+    clear() {
+        this.entries = [];
+    }
 }
 
 const cache = new Cache();
 
-class Posibility {
+export class Posibility {
     constructor(value, parent) {
         this.parent = parent;
         this.value = value;
@@ -27,11 +31,6 @@ class Posibility {
 
 function nextSteps(possibility, capacities) {
     const input = possibility.value;
-
-    if (input.length !== capacities.length) {
-        throw Error('Capacities must match input');
-    }
-
     const result = [];
 
     for (let from = 0; from < capacities.length; from++) {
@@ -62,7 +61,7 @@ function nextSteps(possibility, capacities) {
     return result;
 }
 
-export function allTubes({
+function _allTubes({
     possibilities = [new Posibility([15, 0, 0], null)],
     capacities = [15, 9, 5],
     target = 7,
@@ -71,25 +70,23 @@ export function allTubes({
 } = {}) {
     if (stepNumber > stepLimit) return -1;
     if (possibilities.length === 0) return -1;
+
+    /* Success: print out the sequence */
     const resultP = possibilities.find((p) => p.value.includes(target));
     if (resultP) {
-        const result = [resultP.value]
+        const result = [resultP.value];
         let temp = resultP;
-        while(temp.parent !== null) {
+        while (temp.parent) {
             result.unshift(temp.parent.value);
             temp = temp.parent;
         }
-        return result
+        return result;
     }
 
-    const nextPossibilities = possibilities.reduce((all, p) => {
-        return [...all, ...nextSteps(p, capacities)];
-    }, []);
-
-    // console.log(nextPossibilities)
-
     return allTubes({
-        possibilities: nextPossibilities,
+        possibilities: possibilities.reduce((all, p) => {
+            return [...all, ...nextSteps(p, capacities)];
+        }, []),
         capacities,
         target,
         stepNumber: stepNumber + 1,
@@ -97,4 +94,15 @@ export function allTubes({
     });
 }
 
-console.log(allTubes({ target: 13, stepLimit: 50 }));
+export function allTubes(...args) {
+    cache.clear();
+    const result = _allTubes(...args);
+    cache.clear();
+    return result;
+}
+
+console.log(
+    allTubes({
+        target: 7,
+    })
+);
